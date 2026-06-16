@@ -1,0 +1,2245 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Business Location Analyzer - Damietta</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="leaflet.css" />
+    <link rel="stylesheet" href="styles-professional.css">
+    <!-- Chart.js (local — avoids Tracking Prevention on CDN) -->
+    <script src="chart.umd.min.js"></script>
+    <style>
+        body {
+            background: rgb(0, 0, 0);
+            color: #000000;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Fix for custom markers */
+        .custom-div-icon {
+            background: transparent !important;
+            border: none !important;
+        }
+        
+        /* Hide default Leaflet shadows */
+        .leaflet-marker-shadow {
+            display: none !important;
+        }
+        
+        .leaflet-default-icon-path {
+            background: none !important;
+        }
+
+        /* Google Places indicator */
+        .google-indicator {
+            background: #000000;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+            margin: 10px 0;
+        }
+
+        .data-source-badge {
+            background: #8f1212;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Logo styling */
+        .logo-container {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            z-index: 100;
+        }
+
+        .logo {
+            font-family: 'Inter', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            text-decoration: none;
+            letter-spacing: 2px;
+            display: inline-block;
+        }
+
+        .logo span.open {
+            color: #000000;
+        }
+
+        .logo span.here {
+            color: #8f1212;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+            transition: transform 0.3s ease;
+        }
+
+        /* Final professional styling */
+        .header-final {
+            background: #000000;
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .header-final h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header-final p {
+            font-size: 1.2rem;
+            font-weight: 300;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .features-list {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .feature-item {
+            background: rgba(255,255,255,0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .stats-summary {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+            border: 2px solid #8f1212;
+        }
+
+        .stats-summary h3 {
+            color: #8f1212;
+            margin-bottom: 15px;
+        }
+
+        .stats-grid-mini {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-mini {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-mini-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #8f1212;
+            margin-bottom: 5px;
+        }
+
+        .stat-mini-label {
+            font-size: 0.8rem;
+            color: #8f1212;
+        }
+
+        .loading-enhanced {
+            text-align: center;
+            padding: 40px;
+            color: #8f1212;
+        }
+
+        .loading-enhanced .spinner {
+            margin: 0 auto 15px;
+        }
+
+        .loading-enhanced .loading-text {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .loading-enhanced .loading-subtext {
+            font-size: 0.9rem;
+            color: #999;
+        }
+
+        .success-message {
+            background: #8f1212;
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+        }
+
+        .competitor-legend {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 2px solid #8f1212;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            font-size: 0.9rem;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-left: 10px;
+            border: 2px solid #8f1212;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .legend-primary {
+            background: #dc2626;
+        }
+
+        .legend-related {
+            background: #1e40af;
+        }
+
+        .legend-optimal {
+            background: #ffffff;
+            border: 2px solid #8f1212;
+        }
+
+        /* Enhanced Professional Dashboard Styles */
+        .dashboard-professional {
+            background: black;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            border: 1px solid #8f1212;
+        }
+
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #8f1212;
+            position: relative;
+        }
+
+        .dashboard-header h2 {
+            color: #f1f5f9;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: black;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-card {
+            background: rgb(0, 0, 0);
+            border: 1px solid #8f1212;
+            border-radius: 15px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+            border-color: #64748b;
+        }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: black;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .dashboard-card h3 {
+            color: #8f1212;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dashboard-card .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #8f1212;
+            color: #cbd5e1;
+            gap: 15px;
+        }
+
+        .dashboard-card .metric:last-child {
+            border-bottom: none;
+        }
+
+        .dashboard-card .metric-label {
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+
+        .dashboard-card .metric-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #334155;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: black;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-high {
+            background: #10b981;
+            box-shadow: 0 0 10px #10b981;
+        }
+
+        .status-medium {
+            background: #f59e0b;
+            box-shadow: 0 0 10px #f59e0b;
+        }
+
+        .status-low {
+            background: #ef4444;
+            box-shadow: 0 0 10px #ef4444;
+        }
+
+        /* Chart Container Styles */
+        .chart-container {
+            background: black;
+            border: 1px solid #8f1212;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            position: relative;
+            height: 300px;
+        }
+
+        .chart-container h4 {
+            color: #000000;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 250px;
+        }
+
+        /* Enhanced Card Styles */
+        .stat-card-enhanced {
+            background: black;
+            border: 1px solid #8f1212;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card-enhanced:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .stat-card-enhanced::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(114, 114, 114, 0.1) 0%, transparent 70%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .stat-value-enhanced {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #8f1212;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-label-enhanced {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Data Visualization Grid */
+        .data-viz-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .data-viz-item {
+            background: rgba(0, 0, 0, 0.1);
+            border: 1px solid #8f1212;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .data-viz-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #8f1212;
+            margin-bottom: 5px;
+        }
+
+        .data-viz-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
+        /* Professional Header Styles */
+        .slider-header {
+            position: relative;
+            height: 400px;
+            background: black;
+            color: #f1f5f9;
+            padding: 0;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            border: 1px solid #8f1212;
+            border-radius: 0 0 20px 20px;
+        }
+
+        /* Professional Form Styles */
+        .control-panel {
+            background: black;
+            border: 1px solid #8f1212;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #f1f5f9;
+            font-weight: 500;
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #8f1212;
+            border-radius: 8px;
+            color: #f1f5f9;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: #8f1212;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px 24px;
+            background: #8f1212;
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            filter: brightness(1.05);
+        }
+
+        .btn:hover::before {
+            opacity: 1;
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        /* Tabs */
+        .tabs-professional {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 28px;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.877);
+            border: 1px solid #8f1212;
+            border-radius: 16px;
+        }
+
+        .tab-professional {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 20px;
+            background: transparent;
+            color: #f2f3f5;
+            border: 1px solid transparent;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .tab-professional:hover {
+            color: #e2e8f0;
+            background: rgba(0, 0, 0, 0.12);
+            border-color: rgb(255, 255, 255);
+        }
+
+        .tab-professional.active {
+            color: #fff;
+            background: black;
+            border-color: transparent;
+            box-shadow: 0 6px 20px black;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeTab 0.3s ease;
+        }
+
+        @keyframes fadeTab {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .range-container input[type="range"] {
+            flex: 1;
+            height: 6px;
+            background: white;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .range-container input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background:#8f1212;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .range-value {
+            background: rgba(0, 0, 0, 0.2);
+            color: #ffffff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: 600;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        /* Results Section - Professional Dashboard Style */
+        .results {
+            background: black;
+            border: 1px solid #8f1212;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .results h2 {
+            color: #f1f5f9;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: rgb(26, 25, 25);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #8f1212;
+            border-radius: 15px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #8f1212;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+            border-color: #64748b;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #f8f8f8;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Stats Summary - Professional Dashboard Style */
+        .stats-summary {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #8f1212;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .stats-summary h3 {
+            color: #f1f5f9;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stats-grid-mini {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-mini {
+            background: rgba(0, 0, 0, 0.1);
+            border: 1px solid #8f1212;
+            border-radius: 10px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-mini::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #8f1212);
+            border-radius: 10px 10px 0 0;
+        }
+
+        .stat-mini:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .stat-mini-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+
+        .stat-mini-label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Map Section */
+        .map-section {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #8f1212;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .map-container {
+            height: 400px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #8f1212;
+        }
+
+        .competitor-legend {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #8f1212;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .competitor-legend h4 {
+            color: #f1f5f9;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            color: #cbd5e1;
+        }
+
+        /* Loading */
+        .loading-enhanced {
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #8f1212;
+            border-top: 4px solid #8f1212;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Success Message */
+        .success-message {
+            background: linear-gradient(135deg, #ffffff, #bebebe);
+            color: rgb(0, 0, 0);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .slider-container {
+            position: relative;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            display: none;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        .slide img {
+            width: 100vw;
+            height: 400px;
+            object-fit: cover;
+        }
+
+        .slide-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .slide-content h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .slide-content p {
+            font-size: 1.2rem;
+            font-weight: 300;
+            color: white;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .slider-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            width: 48px;
+            height: 48px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.75);
+            color: #fff;
+            font-size: 1.2rem;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            border: 1px solid #8f1212;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+
+        .slider-arrow:hover {
+            background: #8f1212;
+            transform: translateY(-50%) scale(1.08);
+        }
+
+        .slider-arrow.prev {
+            left: 20px;
+        }
+
+        .slider-arrow.next {
+            right: 20px;
+        }
+
+        .slider-dots {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color:black;
+            cursor: pointer;
+        }
+
+        .dot.active {
+            background-color: #8f1212;
+        }
+
+        /* Footer styling */
+        .footer {
+            position: relative;
+            background: #8f1212;
+            color: white;
+            padding: 60px 0 30px;
+            margin-top: 80px;
+            overflow: hidden;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="70" r="2.5" fill="rgba(255,255,255,0.1)"/><circle cx="60" cy="10" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="80" r="2" fill="rgba(255,255,255,0.1)"/></svg>');
+            background-size: 100px 100px;
+            opacity: 0.3;
+        }
+
+        .footer-content {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .footer-logo-section {
+            text-align: left;
+        }
+
+        .footer-logo {
+            font-family: 'Inter', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+        }
+
+        .footer-tagline {
+            font-size: 1rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .footer-social-section {
+            text-align: right;
+        }
+
+        .footer-social-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            opacity: 0.95;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+
+        .social-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: white;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 2px solid #8f1212;
+        }
+
+        .social-icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .social-icon.facebook:hover {
+            background: #1877F2;
+            border-color: #1877F2;
+        }
+
+        .social-icon.whatsapp:hover {
+            background: #25D366;
+            border-color: #25D366;
+        }
+
+        .social-icon.github:hover {
+            background: #333;
+            border-color: #333;
+        }
+
+        .social-icon.linkedin:hover {
+            background: #0A66C2;
+            border-color: #0A66C2;
+        }
+
+        .footer-bottom {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding-top: 30px;
+            margin-top: 30px;
+            border-top: 1px solid #8f1212;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .footer-logo-section {
+                text-align: center;
+            }
+
+            .footer-social-section {
+                text-align: center;
+            }
+
+            .social-icons {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="slider-header">
+        <div class="logo-container">
+            <a href="#" class="logo">
+                <span class="open">Open</span>
+                <span class="here">Here</span>
+            </a>
+        </div>
+        <div class="slider-container">
+            <div class="slide active">
+                <img src="image/pexels-sevenstormphotography-569590.jpg" alt="Business Professionals">
+                <div class="slide-content">
+                    <h1>Professional Business Location Analyzer</h1>
+                </div>
+            </div>
+            <div class="slide">
+                <img src="image/pexels-cannontaler-18239224.jpg" alt="Business Analysis">
+                <div class="slide-content">
+                    <h1>Market Intelligence</h1>
+                    <p>Comprehensive competitor analysis and optimal location identification</p>
+                </div>
+            </div>
+            <div class="slide">
+                <img src="image/pexels-brandon-ricketts-450464466-17073730.jpg" alt="Professional Investor">
+                <div class="slide-content">
+                    <h1>Data-Driven Decisions</h1>
+                    <p>Real-time market data and AI-powered insights for business success</p>
+                </div>
+            </div>
+            
+            <!-- Navigation Arrows -->
+            <button class="slider-arrow prev" onclick="changeSlide(-1)">&#10094;</button>
+            <button class="slider-arrow next" onclick="changeSlide(1)">&#10095;</button>
+            
+            <!-- Slide Indicators -->
+            <div class="slider-dots">
+                <span class="dot active" onclick="currentSlide(1)"></span>
+                <span class="dot" onclick="currentSlide(2)"></span>
+                <span class="dot" onclick="currentSlide(3)"></span>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="main-content">
+            <section class="control-panel">
+                <form id="searchForm">
+                    <div class="form-group">
+
+                        <label for="area">Select Area</label>
+                    
+                        <select id="area" name="area" required>
+                    
+                            <option value="">
+                                Choose area...
+                            </option>
+                    
+                            <!-- ========================= -->
+                            <!-- Damietta -->
+                            <!-- ========================= -->
+                    
+                            <optgroup label="Damietta">
+                    
+                                <option value="دمياط القديمة">
+                                    Damietta Old City
+                                </option>
+                    
+                                <option value="فارسكور">
+                                    Farskor
+                                </option>
+                    
+                                <option value="كفر سعد">
+                                    Kafr Saad
+                                </option>
+                    
+                                <option value="كفر البطيخ">
+                                    Kafr El-Bateekh
+                                </option>
+                    
+                                <option value="رأس البر">
+                                    Ras El Bar
+                                </option>
+                    
+                                <option value="شطا">
+                                    Shata
+                                </option>
+                                <option value="مركز الزرقا">
+                                    El Zarqa Center
+                                </option>
+                    
+                               
+                            <!-- ========================= -->
+                            <!-- Ezab -->
+                            <!-- ========================= -->
+                    
+                    
+                            <!-- ========================= -->
+                            <!-- New Damietta -->
+                            <!-- ========================= -->
+                    
+                            <optgroup label="New Damietta">
+                    
+                                <option value="دمياط الجديدة">
+                                    New Damietta
+                                </option>
+                    
+                                <option value="الحي الأول">
+                                    First District
+                                </option>
+                    
+                                <option value="الحي الثاني">
+                                    Second District
+                                </option>
+                    
+                                <option value="الحي الثالث">
+                                    Third District
+                                </option>
+                    
+                                <option value="الحي الرابع">
+                                    Fourth District
+                                </option>
+                    
+                                <option value="الحي الخامس">
+                                    Fifth District
+                                </option>
+                    
+                            </optgroup>
+                    
+                        </select>
+                    
+                    </div>
+
+                    <div class="form-group">
+                        <label for="businessType">Business Type</label>
+                        <select id="businessType" name="businessType" required>
+                            <option value="">Choose type...</option>
+                            <option value="cafe">Cafe</option>
+                            <option value="restaurant">Restaurant</option>
+                            <option value="pharmacy">Pharmacy</option>
+                            <option value="supermarket">Supermarket</option>
+                            <option value="gym">Gym</option>
+                            <option value="hotel">Hotel</option>
+                            <option value="bakery">Bakery</option>
+                            <option value="bookstore">Bookstore</option>
+                            <option value="hair_salon">Hair Salon</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn">Analyze Location</button>
+                </form>
+
+                <div id="loading" class="loading-enhanced hidden">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Analyzing area...</div>
+                    <div class="loading-subtext">Searching for competitors and calculating optimal location</div>
+                </div>
+            </section>
+
+            <section class="map-section">
+                <div id="map" class="map-container"></div>
+                
+                <div class="competitor-legend">
+                    <h4>Marker Legend</h4>
+                    <div class="legend-item">
+                        <span>Primary Competitors</span>
+                        <div class="legend-color legend-primary"></div>
+                    </div>
+                    <div class="legend-item">
+                        <span>Related Competitors</span>
+                        <div class="legend-color legend-related"></div>
+                    </div>
+                    <div class="legend-item">
+                        <span>Suggested Optimal Location</span>
+                        <div class="legend-color legend-optimal"></div>
+                    </div>
+                    <div class="legend-item">
+                        <span>Residential Zone</span>
+                        <div class="legend-color" style="background:#10b981;width:20px;height:20px;border-radius:50%"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div id="results" class="results hidden">
+            <h2 style="color: white;">Analysis Results</h2>
+        </div>
+
+        <div id="dashboard" class="dashboard-professional hidden">
+            <div class="dashboard-header">
+                <h2>Intelligent Analysis Dashboard</h2>
+            </div>
+            
+            <div class="tabs-professional">
+                <button class="tab-professional active" data-tab="analysis">Analysis</button>
+                <button class="tab-professional" data-tab="demographics">Area</button>
+                <button class="tab-professional" data-tab="services">Services</button>
+                <button class="tab-professional" data-tab="ai">AI</button>
+            </div>
+            
+            <div id="analysis" class="tab-content active">
+                <!-- Enhanced Statistics Cards -->
+                <div class="data-viz-grid">
+                    <div class="stat-card-enhanced">
+                        <div class="stat-value-enhanced" id="compCount">7</div>
+                        <div class="stat-label-enhanced">Competitors</div>
+                    </div>
+                    <div class="stat-card-enhanced">
+                        <div class="stat-value-enhanced" id="avgDistance">460m</div>
+                        <div class="stat-label-enhanced">Avg Distance</div>
+                    </div>
+                    <div class="stat-card-enhanced">
+                        <div class="stat-value-enhanced" id="optimalScore">96</div>
+                        <div class="stat-label-enhanced">Location Score</div>
+                    </div>
+                </div>
+
+                <!-- Chart Section -->
+                <div class="chart-container">
+                    <h4>Competition Analysis (Real Data)</h4>
+                    <div class="chart-wrapper">
+                        <canvas id="competitionChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <h3>
+                            <span class="status-indicator status-high"></span>
+                            Competition Analysis
+                        </h3>
+                        <div class="metric">
+                            <span class="metric-label">Competitor Count</span>
+                            <span class="metric-value" id="compCountCard">9</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Market Density</span>
+                            <span class="metric-value" id="marketDensity">hight</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Average Rating</span>
+                            <span class="metric-value" id="avgCompRatingCard">70</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 65%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h3>
+                            <span class="status-indicator status-medium"></span>
+                            Optimal Location
+                        </h3>
+                        <div class="metric">
+                            <span class="metric-label">Location Score</span>
+                            <span class="metric-value"><span id="optimalScoreCard">5</span>/100</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Nearby Competitors</span>
+                            <span class="metric-value" id="nearbyComp">8</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Strategy</span>
+                            <span class="metric-value" id="strategy">To be determined</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 45%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h3>
+                            <span class="status-indicator status-low"></span>
+                            Business Intelligence
+                        </h3>
+                        <div class="metric">
+                            <span class="metric-label">Market Opportunity</span>
+                            <span class="metric-value" id="marketOppCard">60%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Entry Risk Level</span>
+                            <span class="metric-value" id="entryRisk">medium</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Growth Potential</span>
+                            <span class="metric-value" id="growthPot">High</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 80%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="demographics" class="tab-content">
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <h3>
+                            <span class="status-indicator status-high"></span>
+                            Population Metrics
+                        </h3>
+                        <div class="metric">
+                            <span class="metric-label">Total Population</span>
+                            <span class="metric-value" id="population">150,000</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Population Density</span>
+                            <span class="metric-value" id="density">High</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Growth Rate</span>
+                            <span class="metric-value" id="growthRate">+2.5%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 75%">85
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h3>
+                            <span class="status-indicator status-medium">7</span>
+                            Economic Indicators
+                        </h3>
+                        <div class="metric">
+                            <span class="metric-label">Average Income</span>
+                            <span class="metric-value" id="avgIncome">8,000 EGP</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Commercial Activity</span>
+                            <span class="metric-value" id="commercialActivity">High</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Market Size</span>
+                            <span class="metric-value" id="marketSize">Large</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 60%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h3>
+                            <span class="status-indicator status-high"></span>
+                            Target Audience
+                        </h3>
+                        <div class="metric">
+                            <span class="metric-label">Primary Category</span>
+                            <span class="metric-value" id="targetAudience">Mixed</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Foot Traffic</span>
+                            <span class="metric-value" id="footTraffic">Very High</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Peak Hours</span>
+                            <span class="metric-value" id="peakHours">9am-8pm</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 85%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="services" class="tab-content">
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <h3>
+                            <span class="status-indicator status-medium"></span>
+                            Healthcare Facilities
+                        </h3>
+                        <div class="metric">
+                            <span class="metric-label">Hospitals</span>
+                            <span class="metric-value">3-5 within 5km</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Pharmacies</span>
+                            <span class="metric-value">10-15 within 2km</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Clinics</span>
+                            <span class="metric-value">8-12 within 3km</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 70%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h3>
+                            <span class="status-indicator status-high"></span>
+                            Education Centers
+                        </h3>
+                        <div class="metric">
+                            <span class="metric-label">Schools</span>
+                            <span class="metric-value">6-10 within 2km</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Universities</span>
+                            <span class="metric-value">1-2 within 5km</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Training Centers</span>
+                            <span class="metric-value">5-8 within 3km</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 65%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card">
+                        <h3>
+                            <span class="status-indicator status-medium"></span>
+                            Infrastructure
+                        </h3>
+                        <div class="metric">
+                            <span class="metric-label">Shopping Centers</span>
+                            <span class="metric-value">3-6 within 3km</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Banking Services</span>
+                            <span class="metric-value">10-15 within 2km</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Public Transport</span>
+                            <span class="metric-value">Good</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 55%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="ai" class="tab-content">
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <h3>
+                            <span class="status-indicator status-high"></span>
+                            AI-Powered Analysis
+                        </h3>
+                        <div class="metric">
+                            <span class="metric-label">Analysis Status</span>
+                            <span class="metric-value">Ready</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Processing Time</span>
+                            <span class="metric-value">< 2 seconds</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Accuracy Rate</span>
+                            <span class="metric-value">94%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 95%"></div>
+                        </div>
+                        <div style="margin-top: 20px; padding: 15px; background: rgba(107, 114, 128, 0.1); border-radius: 8px; border-left: 4px solid #8f1212;">
+                            <p style="color: #cbd5e1; margin: 0;" id="aiAnalysis">Perform a search to get detailed intelligent analysis</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Real Estate Companies Section -->
+        <div class="real-estate-section" style="background: rgba(0, 0, 0, 0.8); border: 1px solid #8f1212; border-radius: 15px; padding: 30px; margin: 20px 0; backdrop-filter: blur(10px);">
+            <div class="section-header" style="text-align: center; margin-bottom: 30px;">
+                <h3 style="color: #f1f5f9; font-size: 1.5rem; font-weight: 600; margin-bottom: 10px;">
+                    <span style="color: #8f1212;">Premium</span> Real Estate Companies in Damietta & New Damietta
+                </h3>
+                <p style="color: #94a3b8; font-size: 0.9rem;">Professional real estate services with contact information</p>
+            </div>
+            
+            <div class="real-estate-categories" style="margin-bottom: 20px;">
+                <div style="background: rgba(0, 0, 0, 0.1); border: 1px solid #8f1212; border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                    <h4 style="color: #8f1212; margin-bottom: 10px; font-size: 1.1rem;">Top Certified Companies (Verified Data)</h4>
+                </div>
+            </div>
+            
+            <div class="real-estate-table-container" style="overflow-x: auto;">
+                <table class="real-estate-table" style="width: 100%; border-collapse: collapse; background: rgba(30, 41, 59, 0.8); border-radius: 10px; overflow: hidden;">
+                    <thead>
+                        <tr style="background: black">
+                            <th style="padding: 15px; text-align: right; color: white; font-weight: 600; border: 1px solid #8f1212;">Company Name</th>
+                            <th style="padding: 15px; text-align: right; color: white; font-weight: 600; border: 1px solid #8f1212;">Phone Number</th>
+                            <th style="padding: 15px; text-align: right; color: white; font-weight: 600; border: 1px solid #8f1212;">WhatsApp</th>
+                            <th style="padding: 15px; text-align: right; color: white; font-weight: 600; border: 1px solid #8f1212;">Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid #8f1212;">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">KMG Developments - كي ام جي للتطوير العقاري</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01550407009</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201550407009" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Development</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212; background: rgba(0, 0, 0, 0.05);">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">القدس للتطوير العقاري</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01011931659</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201011931659" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Development</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">ALBROG DEVELOPMENT-البروچ للتطوير العقاري</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01000533661</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201000533661" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Development</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212; background: rgba(0, 0, 0, 0.05);">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">we build development-وي بيلد للتطوير العقاري</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01007004415</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201007004415" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Development</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">المجد والصفا للتطوير العقارى</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01508358565</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201508358565" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Development</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212; background: rgba(107, 114, 128, 0.05);">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">الرونق للتطوير العقاري</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01111939315</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201111939315" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Development</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212;">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">شركة معمار الحمد للاستثمار العقاري</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01010484801</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201010484801" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Investment</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212; background: rgba(107, 114, 128, 0.05);">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">كيان للتطوير العقاري</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01066212275</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201066212275" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Development</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212;">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">Bedaya Real Estate</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01552544001</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201552544001" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Services</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212; background: rgba(0, 0, 0, 0.05);">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">Zawaya Developments</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01012323213</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201012323213" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Development</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212;">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">شركة فيوتشر</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01067179077</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201067179077" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Investment</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212; background: rgba(0, 0, 0, 0.05);">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">Plan realty</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01009497733</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201009497733" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Services</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212;">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">Our House المجموعة العقارية بدمياط الجديدة</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01010811555</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201010811555" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Services</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212; background: rgba(107, 114, 128, 0.05);">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">سيتي للتطوير العقاري</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01009093999</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201009093999" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Development</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212;">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">Trustiva real estate</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01033444606</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201033444606" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Services</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212; background: rgba(107, 114, 128, 0.05);">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">عز هاوس العقارية</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01090256548</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201090256548" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Investment</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="real-estate-categories" style="margin: 30px 0;">
+                <div style="background: rgba(0, 0, 0, 0.1); border: 1px solid #8f1212; border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                    <h4 style="color: #8f1212; margin-bottom: 10px; font-size: 1.1rem;">Premium Additional Companies (From Trusted Sources)</h4>
+                </div>
+            </div>
+            
+            <div class="real-estate-table-container" style="overflow-x: auto;">
+                <table class="real-estate-table" style="width: 100%; border-collapse: collapse; background: rgba(30, 41, 59, 0.8); border-radius: 10px; overflow: hidden;">
+                    <thead>
+                        <tr style="background: black">
+                            <th style="padding: 15px; text-align: right; color: white; font-weight: 600; border: 1px solid #8f1212;">Company Name</th>
+                            <th style="padding: 15px; text-align: right; color: white; font-weight: 600; border: 1px solid #8f1212;">Phone Number</th>
+                            <th style="padding: 15px; text-align: right; color: white; font-weight: 600; border: 1px solid #8f1212;">WhatsApp</th>
+                            <th style="padding: 15px; text-align: right; color: white; font-weight: 600; border: 1px solid #8f1212;">Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid #8f1212;">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">سكن دمياط الجديده</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01090291844</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/c/201090291844" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Services</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212; background: rgba(0, 0, 0, 0.05);">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">استثمار عقاري</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01017936697</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201017936697" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Investment</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212;">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">شركة آفاق للإستثمار العقاري والمقاولات</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01004146064</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201004146064" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Investment</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212; background: rgba(107, 114, 128, 0.05);">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">أصول للإستثمار والتطوير العقارى</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01019571551</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201019571551" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Investment</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212;">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">القيصر للتطوير العقارى</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01117262666</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201117262666" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Development</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212; background: rgba(0, 0, 0, 0.05);">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">الحصن للتطوير العقاري - El Hesn Development</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01006663839</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201006663839" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Development</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212;">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">شركة تطوير</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01511111370</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201511111370" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Development</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212; background: rgba(107, 114, 128, 0.05);">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">Council</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01009005151</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201009005151" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Development</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212;">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">مجموعة تطوير العقارية</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01511111370</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201511111370" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Investment</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212; background: rgba(0, 0, 0, 0.05);">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">Castle development</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01022282489</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201022282489" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Development</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212;">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">دار الحجاز للهندسه والتطوير العقاري</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01009099023</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201009099023" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Development</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212; background: rgba(107, 114, 128, 0.05);">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">Ur Taj development</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01500444549</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201500444549" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Development</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212;">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">شركة السعودي للاستثمار العقاري</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01080226612</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201080226612" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Investment</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212; background: rgba(0, 0, 0, 0.05);">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">البهنساوي للتسويق العقاري</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01066684365</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201066684365" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Marketing</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212;">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">bonyan</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">01005058428</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/201005058428" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Development</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #8f1212; background: rgba(107, 114, 128, 0.05);">
+                            <td style="padding: 15px; color: #f1f5f9; border: 1px solid #8f1212; font-weight: 600;">Bariq بريق</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">16591</td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;"><a href="https://wa.me/2016591" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> Chat</a></td>
+                            <td style="padding: 15px; color: #cbd5e1; border: 1px solid #8f1212;">Real Estate Development</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="real-estate-footer" style="margin-top: 20px; text-align: center; padding: 15px; background: rgba(107, 114, 128, 0.1); border-radius: 10px; border: 1px solid #8f1212;">
+                <p style="color: #8f1212; font-size: 0.85rem; margin: 0;">
+                    <span style="color: #8f1212;">Info</span> 
+                    For professional real estate services and property investment opportunities in Damietta and New Damietta
+                </p>
+            </div>
+        </div>
+
+
+    </div>
+
+    <script src="leaflet.js"></script>
+    <script src="data-new.js"></script>
+    <script src="script-json-loader.js"></script>
+    <script src="script-google-complete-with-json.js"></script>
+    
+    <script>
+        // Professional tabs functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.tab-professional');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const targetTab = this.getAttribute('data-tab');
+                    
+                    // Remove active class from all tabs and contents
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    this.classList.add('active');
+                    const targetContent = document.getElementById(targetTab);
+                    if (targetContent) {
+                        targetContent.classList.add('active');
+                        
+                        // Initialize specific content for each tab
+                        if (targetTab === 'demographics') {
+                            initializeDemographicsCharts();
+                        } else if (targetTab === 'services') {
+                            initializeServicesCharts();
+                        } else if (targetTab === 'ai') {
+                            updateAIStatus();
+                        } else if (targetTab === 'analysis') {
+                            initializeAnalysisCharts();
+                        }
+                    }
+                });
+            });
+
+            // Initialize Charts
+            initializeCharts();
+        });
+
+        const TYPE_LABELS = {
+            cafe: 'Cafes',
+            restaurant: 'Restaurants',
+            pharmacy: 'Pharmacies',
+            supermarket: 'Supermarkets',
+            gym: 'Gyms',
+            hotel: 'Hotels',
+            bakery: 'Bakeries',
+            bookstore: 'Bookstores',
+            hair_salon: 'Hair Salons'
+        };
+
+        window.realCharts = {};
+
+        function initializeCharts() {
+            ensureExtraCharts();
+            initEmptyCharts();
+        }
+
+        function ensureExtraCharts() {
+            addDemographicsChart();
+            addServicesChart();
+        }
+
+        function initEmptyCharts() {
+            const ctx = document.getElementById('competitionChart');
+            if (ctx && !window.realCharts.competition) {
+                window.realCharts.competition = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['—'],
+                        datasets: [{
+                            label: 'Number of Activities',
+                            data: [0],
+                            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                            borderRadius: 8
+                        }]
+                    },
+                    options: chartBarOptions('Search to display real data')
+                });
+            }
+        }
+
+        function chartBarOptions(subtitle) {
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    subtitle: {
+                        display: !!subtitle,
+                        text: subtitle,
+                        color: '#64748b'
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                        titleColor: '#f1f5f9',
+                        bodyColor: '#cbd5e1'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#94a3b8', stepSize: 1 },
+                        grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                    },
+                    x: {
+                        ticks: { color: '#94a3b8' },
+                        grid: { display: false }
+                    }
+                }
+            };
+        }
+
+        window.updateRealAnalysisCharts = function(payload) {
+            if (!payload || !payload.areaStats) return;
+
+            ensureExtraCharts();
+
+            const stats = payload.areaStats.byType;
+            const labels = Object.keys(stats).map(k => TYPE_LABELS[k] || k);
+            const values = Object.values(stats);
+
+            if (window.realCharts.competition) {
+                const c = window.realCharts.competition;
+                c.data.labels = labels;
+                c.data.datasets[0].data = values;
+                c.data.datasets[0].backgroundColor = [
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(245, 158, 11, 0.8)',
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(139, 92, 246, 0.8)',
+                    'rgba(236, 72, 153, 0.8)',
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(14, 165, 233, 0.8)',
+                    'rgba(251, 146, 60, 0.8)'
+                ];
+                c.options.plugins.subtitle = {
+                    display: true,
+                    text: 'Real Data — ' + payload.area,
+                    color: '#94a3b8'
+                };
+                c.update();
+            }
+
+            if (window.realCharts.population) {
+                const nonZero = labels.filter((_, i) => values[i] > 0);
+                const nonZeroVals = values.filter(v => v > 0);
+                const p = window.realCharts.population;
+                p.data.labels = nonZero.length ? nonZero : ['No Data'];
+                p.data.datasets[0].data = nonZeroVals.length ? nonZeroVals : [1];
+                p.update();
+            }
+
+            if (window.realCharts.services) {
+                const max = Math.max(...values, 1);
+                const radar = [
+                    Math.round((stats.pharmacy / max) * 100),
+                    Math.round((stats.bookstore / max) * 100),
+                    Math.round(((stats.supermarket + (stats.clothing || 0)) / max) * 100),
+                    Math.round((stats.cafe / max) * 100),
+                    Math.round((stats.restaurant / max) * 100),
+                    Math.round((stats.gym / max) * 100)
+                ];
+                window.realCharts.services.data.datasets[0].data = radar;
+                window.realCharts.services.options.plugins.subtitle = {
+                    display: true,
+                    text: payload.area + ' — ' + payload.areaStats.total + ' activities',
+                    color: '#94a3b8'
+                };
+                window.realCharts.services.update();
+            }
+
+            const aiEl = document.getElementById('aiAnalysis');
+            if (aiEl && payload.optimalLocation) {
+                const a = payload.optimalLocation.analysis || {};
+                aiEl.dataset.updated = '1';
+                aiEl.innerHTML =
+                    '<strong>Smart Analysis — ' + payload.area + '</strong><br><br>' +
+                    '• Total activities in area: ' + payload.areaStats.total + '<br>' +
+                    '• Competitors (selected type): ' + payload.competitors.length + '<br>' +
+                    '• Optimal location: ' + (a.residentialDist || '—') + 'm from residential, ' +
+                    'avg ' + (a.avgCompetitorDist || '—') + 'm from competitors<br>' +
+                    '• Score: ' + payload.optimalLocation.score + '/100';
+            }
+        };
+
+        function addDemographicsChart() {
+            const demographicsTab = document.getElementById('demographics');
+            if (!demographicsTab || window.realCharts.population) return;
+            if (demographicsTab.querySelector('#populationChart')) return;
+
+            const chartContainer = document.createElement('div');
+            chartContainer.className = 'chart-container';
+            chartContainer.innerHTML = `
+                <h4>Business Activities Distribution (Real Data)</h4>
+                <div class="chart-wrapper">
+                    <canvas id="populationChart"></canvas>
+                </div>
+            `;
+            const grid = demographicsTab.querySelector('.dashboard-grid');
+            if (grid) demographicsTab.insertBefore(chartContainer, grid);
+
+            window.realCharts.population = new Chart(document.getElementById('populationChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['—'],
+                    datasets: [{
+                        data: [1],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(139, 92, 246, 0.8)',
+                            'rgba(236, 72, 153, 0.8)',
+                            'rgba(245, 158, 11, 0.8)'
+                        ],
+                        borderColor: 'transparent',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#cbd5e1', padding: 12 }
+                        },
+                        subtitle: {
+                            display: true,
+                            text: 'From data-new.json',
+                            color: '#64748b'
+                        }
+                    }
+                }
+            });
+        }
+
+        function addServicesChart() {
+            const servicesTab = document.getElementById('services');
+            if (!servicesTab || window.realCharts.services) return;
+            if (servicesTab.querySelector('#servicesChart')) return;
+
+            const chartContainer = document.createElement('div');
+            chartContainer.className = 'chart-container';
+            chartContainer.innerHTML = `
+                <h4>Area Services Index (Real Data)</h4>
+                <div class="chart-wrapper">
+                    <canvas id="servicesChart"></canvas>
+                </div>
+            `;
+            const grid = servicesTab.querySelector('.dashboard-grid');
+            if (grid) servicesTab.insertBefore(chartContainer, grid);
+
+            window.realCharts.services = new Chart(document.getElementById('servicesChart'), {
+                type: 'radar',
+                data: {
+                    labels: ['Health', 'Education', 'Shopping', 'Cafes', 'Restaurants', 'Sports'],
+                    datasets: [{
+                        label: 'Area',
+                        data: [0, 0, 0, 0, 0, 0],
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(59, 130, 246, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        subtitle: {
+                            display: true,
+                            text: 'Percentage of highest activity in area',
+                            color: '#64748b'
+                        }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                            pointLabels: { color: '#cbd5e1' },
+                            ticks: { color: '#94a3b8', backdropColor: 'transparent' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function initializeDemographicsCharts() {
+            // Initialize demographics-specific charts
+            setTimeout(() => {
+                addDemographicsChart();
+            }, 100);
+        }
+
+        function initializeServicesCharts() {
+            // Initialize services-specific charts
+            setTimeout(() => {
+                addServicesChart();
+            }, 100);
+        }
+
+        function initializeAnalysisCharts() {
+            ensureExtraCharts();
+        }
+
+        function updateAIStatus() {
+            const aiAnalysisElement = document.getElementById('aiAnalysis');
+            if (aiAnalysisElement && !aiAnalysisElement.dataset.updated) {
+                aiAnalysisElement.innerHTML = 'نفّذ بحثاً لعرض تحليل حقيقي من data-new.json';
+            }
+        }
+
+        // Slider functionality
+        let currentSlideIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+        const dots = document.querySelectorAll('.dot');
+        const totalSlides = slides.length;
+        
+        // Show specific slide
+        function showSlide(index) {
+            // Hide all slides
+            slides.forEach(slide => slide.classList.remove('active'));
+            dots.forEach(dot => dot.classList.remove('active'));
+            
+            // Show current slide
+            slides[index].classList.add('active');
+            dots[index].classList.add('active');
+        }
+        
+        // Change slide function
+        function changeSlide(direction) {
+            currentSlideIndex += direction;
+            
+            // Wrap around
+            if (currentSlideIndex >= totalSlides) {
+                currentSlideIndex = 0;
+            } else if (currentSlideIndex < 0) {
+                currentSlideIndex = totalSlides - 1;
+            }
+            
+            showSlide(currentSlideIndex);
+        }
+        
+        // Go to specific slide
+        function currentSlide(index) {
+            currentSlideIndex = index - 1;
+            showSlide(currentSlideIndex);
+        }
+        
+        // Auto-advance slider every minute (60000 milliseconds)
+        function autoSlide() {
+            currentSlideIndex++;
+            if (currentSlideIndex >= totalSlides) {
+                currentSlideIndex = 0;
+            }
+            showSlide(currentSlideIndex);
+        }
+        
+        // Start auto-slide
+        setInterval(autoSlide, 60000); // Change every minute
+        
+        // Initialize first slide
+        showSlide(0);
+    </script>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo-section">
+                <div class="footer-logo">Open Here</div>
+                <p class="footer-tagline">
+                    Professional Business Location Analyzer<br>
+                    Find the optimal location for your business in Damietta
+                </p>
+            </div>
+            <div class="footer-social-section">
+                <h3 class="footer-social-title">Connect With Us</h3>
+                <div class="social-icons">
+                    <a href="https://facebook.com" target="_blank" class="social-icon facebook" title="Facebook">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="https://wa.me/201000000000" target="_blank" class="social-icon whatsapp" title="WhatsApp">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                    <a href="https://github.com" target="_blank" class="social-icon github" title="GitHub">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="https://linkedin.com" target="_blank" class="social-icon linkedin" title="LinkedIn">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Open Here. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
